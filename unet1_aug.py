@@ -21,8 +21,13 @@ except ImportError:
 import matplotlib.pyplot as plt
 
 
+normalization = True
+
 input_file = './train_data/train_data_zero_mean_aug.hdf5'
-output_dir = './unet1_aug_result'
+if normalization:
+    output_dir = './unet1_normalization_result'
+else:
+    output_dir = './unet1_aug_result'
 
 if not os.path.isdir(output_dir):
     os.mkdir(output_dir)
@@ -46,6 +51,22 @@ test1 = rec_map[18000:][:, :, :, np.newaxis]
 train2 = in_map[:12000][:, :, :, np.newaxis]
 val2 = in_map[12000:18000][:, :, :, np.newaxis]
 test2 = in_map[18000:][:, :, :, np.newaxis]
+
+if normalization:
+    train_mean = np.mean(train1, axis=(1, 2, 3))
+    val_mean = np.mean(val1, axis=(1, 2, 3))
+    test_mean = np.mean(test1, axis=(1, 2, 3))
+    train_std = np.std(train1, axis=(1, 2, 3))
+    val_std = np.std(val1, axis=(1, 2, 3))
+    test_std = np.std(test1, axis=(1, 2, 3))
+
+    train1 = (train1 - train_mean[:, np.newaxis, np.newaxis, np.newaxis]) / train_std[:, np.newaxis, np.newaxis, np.newaxis]
+    train2 = (train2 - train_mean[:, np.newaxis, np.newaxis, np.newaxis]) / train_std[:, np.newaxis, np.newaxis, np.newaxis]
+    val1 = (val1 - val_mean[:, np.newaxis, np.newaxis, np.newaxis]) / val_std[:, np.newaxis, np.newaxis, np.newaxis]
+    val2 = (val2 - val_mean[:, np.newaxis, np.newaxis, np.newaxis]) / val_std[:, np.newaxis, np.newaxis, np.newaxis]
+    test1 = (test1 - test_mean[:, np.newaxis, np.newaxis, np.newaxis]) / test_std[:, np.newaxis, np.newaxis, np.newaxis]
+    test2 = (test2 - test_mean[:, np.newaxis, np.newaxis, np.newaxis]) / test_std[:, np.newaxis, np.newaxis, np.newaxis]
+
 
 
 # unet
@@ -78,6 +99,7 @@ conv6 = Conv2D(1, 1, activation = 'linear')(conv5)
 
 
 model = Model(input_img, conv6)
+model.summary()
 
 # # save model
 # json_string = model.to_json()
@@ -89,16 +111,15 @@ model = Model(input_img, conv6)
 model.compile(optimizer='adam', loss='mse')
 # model.compile(optimizer='adam', loss='mae') # use mae to promote sparsity for point sources
 
-model.summary()
 
 
-batch_size = 128
+batch_size = 32
 # epochs = 100
 epochs = 1
 
 loss = []
 val_loss = []
-for ii in range(50):
+for ii in range(100):
 
     # es_cb = EarlyStopping(monitor='val_loss', patience=2, verbose=1, mode='auto')
     # chkpt = saveDir + 'AutoEncoder_Cifar10_denoise_weights.{epoch:02d}-{loss:.2f}-{val_loss:.2f}.hdf5'
@@ -117,6 +138,8 @@ for ii in range(50):
     model.save_weights(output_dir + '/model_weights_%04d.h5' % ii)
 
     predict = model.predict(train1[0].reshape(1, npix, npix, 1))
+    if normalization:
+        predict = predict * test_std[0] + test_mean[0]
 
     # plot predict
     plt.figure()
