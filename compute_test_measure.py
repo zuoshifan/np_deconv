@@ -9,6 +9,7 @@ from structural_similarity import structural_similarity
 
 
 epoch = 99
+normalization = False
 
 input_file = './train_data/train_data_zero_mean.hdf5'
 
@@ -37,7 +38,10 @@ for net in nets:
     # net = 'unet'
     # net = 'unet1'
 
-    model_weight_dir = './%s_normalization_result' % net
+    if normalization:
+        model_weight_dir = './%s_normalization_result' % net
+    else:
+        model_weight_dir = './%s_result' % net
 
     # load model
     with open('%s.json' % net, 'r') as f:

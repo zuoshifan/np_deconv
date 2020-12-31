@@ -21,7 +21,7 @@ except ImportError:
 import matplotlib.pyplot as plt
 
 
-normalization = True
+normalization = False
 
 input_file = './train_data/train_data_zero_mean.hdf5'
 if normalization:
