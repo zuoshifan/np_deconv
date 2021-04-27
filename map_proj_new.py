@@ -38,19 +38,19 @@ def azimuthal_projmap(map_, rot=None, coord=None, xsize=800, reso=1.5, nest=Fals
 
 
 if __name__ == '__main__':
-    input_maps_dir1 = '/public/home/wufq/sfzuo/workspace/dish_simNP_750MHz/ps_map/'
+    # input_maps_dir1 = '/public/home/wufq/sfzuo/workspace/dish_simNP_750MHz/ps_map/'
     input_maps_dir2 = '/public/home/wufq/sfzuo/workspace/dish_simNP_750MHz/750_maps/'
     re_maps_dir = '/public/home/wufq/sfzuo/workspace/dish_simNP_750MHz/output_sim_750MHz_2/map'
-    input_path1 = Path(input_maps_dir1)
+    # input_path1 = Path(input_maps_dir1)
     input_path2 = Path(input_maps_dir2)
     re_path = Path(re_maps_dir)
 
     # output_path = Path(target_maps_dir)
 
-    input_file1  = sorted(input_path1.glob('ps_*.hdf5'))
+    # input_file1  = sorted(input_path1.glob('ps_*.hdf5'))
     input_file2  = sorted(input_path2.glob('21cm_*.hdf5'))
     input_file3  = sorted(input_path2.glob('fg_*.hdf5'))
-    n_file = len(input_file1)
+    n_file = len(input_file2)
     re_file = [re_path.joinpath("ts_750_gen_data_%s" % i, 'ts', 'map_full.hdf5') for i in range(n_file)]
 
     input_map_cut = []
@@ -59,10 +59,11 @@ if __name__ == '__main__':
 
     for i in range(n_file):
         print('file No.', i)
-        input_map1_i = h5py.File(input_file1[i], 'r')['map'][:]
+        # input_map1_i = h5py.File(input_file1[i], 'r')['map'][:]
         input_map2_i = h5py.File(input_file2[i], 'r')['map'][:]
         input_map3_i = h5py.File(input_file3[i], 'r')['map'][:]
-        input_map_i = input_map1_i + input_map2_i + input_map3_i
+        # input_map_i = input_map1_i + input_map2_i + input_map3_i
+        input_map_i = input_map2_i + input_map3_i
         re_map_i = h5py.File(re_file[i], 'r')['map'][:]
 
         input_map_cut_i, re_map_cut_i = map_proj(input_map_i, re_map_i, rot=[0.0, 90.0, 0.0], xsize=100, reso=12.0)
